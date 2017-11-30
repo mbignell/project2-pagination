@@ -1,29 +1,24 @@
 // create an array of the list
 const students = document.getElementsByClassName('student-item');
 
-// Define number of images per page
-const numberPerPage = 10;
+// Define number of students per page
+const studentsPerPage = 10;
 
 // Define how many page numbers are needed based on # of list items in .student-list
-const pages =  Math.ceil( students.length / numberPerPage ) + 1;
+const pages =  Math.ceil( students.length / studentsPerPage ) + 1;
 
 let pagesDiv;
 let currentPageNumber = 1;
 
-// On initial load, hide all students
-for(var i = 0; i < students.length; i++) {
-  students[i].classList.add("hidden");
-}
-
-// Change students that are visible
+// Change students that are visible based on the page number
 function showPage(newPageNumber) {
   // Hide all students currently on page
   for(var i = 0; i < students.length; i++) {
     students[i].classList.add("hidden");
   }
   // Capture the student indexes that should be shown on  page
-  let newStartIndex = (newPageNumber * numberPerPage - numberPerPage);
-  let newEndIndex = newPageNumber * numberPerPage;
+  let newStartIndex = (newPageNumber * studentsPerPage - studentsPerPage);
+  let newEndIndex = newPageNumber * studentsPerPage;
 
   // This fixes the issue of the last page breaking.
   // Is there a cleaner way to do this?
@@ -42,7 +37,7 @@ function appendPageLinks(currentPageNumber){
   pagesDiv.innerHTML = "";
 
   // Create page link html
-  let pagesHTML = `<ul>`;
+  let pagesHTML = `<ul> `;
 
   // Loop on page numbers
   for(var i = 1; i < pages; i++) {
@@ -65,6 +60,7 @@ function appendPageLinks(currentPageNumber){
   pagesDiv.innerHTML = pagesHTML;
 
 };
+
 
 // function searchList(searchText) {
 //     // Obtain the value of the search input
@@ -89,16 +85,16 @@ function createSearchBox() {
   let searchDiv = document.getElementsByClassName('student-search')[0];
   //when it leaves focus clear search box?
   // "x" to clear
-  searchDiv.innerHTML =  `<div onKeyPress="searchKeyPress()" onKeyUp="searchKeyPress()" id="student-search"><input id="search-input" placeholder="Search for students..."> <button onClick="searchKeyPress()">Search</button></div>`;
+  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
 };
 
-// Initializes page on page 1.
-appendPageLinks(1);
-createSearchBox();
+function searchButtonPress() {
+  // take the search input
+  // compare it to the strings
+  // if it's empty
 
-function searchKeyPress() {
   let searchInput = document.getElementById("search-input").value;
-  console.log(searchInput);
+  // console.log(searchInput);
 
   if (searchInput != '') {
     for(var i = 0; i < students.length; i++) {
@@ -114,31 +110,38 @@ function searchKeyPress() {
   // Declare variables
   let filter = searchInput.toLowerCase();
   let ul = document.getElementsByClassName('student-list')[0];
-  console.log(ul);
+  let noResults = `<p>noresults</p>`;
   var searchResultNumber = 0;
 
-    // Loop through all list items, and hide those who don't match the search query
-   for (i = 0; i < students.length; i++) {
-       result = students[i].getElementsByTagName("h3")[0];
-       if (result.innerHTML.toLowerCase().indexOf(filter) > -1) {
-           students[i].classList.remove("hidden");
-           searchResultNumber += 1;
-       } else {
-           students[i].classList.add("hidden");
-       };
-   };
-   if (searchResultNumber > numberPerPage) {
-     var searchResultPages = Math.ceil( searchResultNumber / numberPerPage ) + 1;
-     appendPageLinks(searchResultPages);
-   } else if (searchResultNumber === 0) {
-     console.log("no reulsts!!!!!!");
-     let noResultsHTML = `<p class="student-no-results">No results!</p>`;
-     ul.innerHTML(noResultsHTML);
-   } else {
-    //  let noResultsHTML = document.getElementsByClassName('student-no-results')[0];
-    //  noResultsHTML.style.display
-   };
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < students.length; i++) {
+     result = students[i].getElementsByTagName("h3")[0];
+     if (result.innerHTML.toLowerCase().indexOf(filter) > -1) {
+         students[i].classList.remove("hidden");
+         searchResultNumber += 1;
+     } else {
+         students[i].classList.add("hidden");
+     };
+  };
+
+  if (searchResultNumber > studentsPerPage) {
+    var searchResultPages = Math.ceil( searchResultNumber / studentsPerPage );
+    appendSearchLinks(searchResultPages);
+  }
+
+  if (searchResultNumber > 0) {
+    // change title of page to students - search results
+  };
+
+  // if there's no results
+  if (searchResultNumber === 0) {
+    pagesDiv.innerHTML = noResults;
+  };
+
 };
 
+// Initializes page on page 1.
+appendPageLinks(1);
+createSearchBox();
 
 /// ADD ARROWS?
