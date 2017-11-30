@@ -136,8 +136,9 @@ function searchButtonPress() {
 
   // Loop through all list items, and hide those who don't match the search query
   for (i = 0; i < students.length; i++) {
-     result = students[i].getElementsByTagName("h3")[0];
-     if (result.innerHTML.toLowerCase().indexOf(filter) > -1) {
+     studentNames = students[i].getElementsByTagName("h3")[0];
+     studentEmails = students[i].getElementsByClassName("email")[0];
+     if (studentNames.innerHTML.toLowerCase().indexOf(filter) > -1 || studentEmails.innerHTML.toLowerCase().indexOf(filter) > -1) {
          students[i].classList.remove("hidden");
          searchResultsArray.push(students[i]);
          searchResultNumber += 1;
