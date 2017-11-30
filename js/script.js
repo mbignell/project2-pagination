@@ -4,37 +4,51 @@ const students = document.getElementsByClassName('student-item');
 // Define number of students per page
 const studentsPerPage = 10;
 
-// Define how many page numbers are needed based on # of list items in .student-list
-const pages =  Math.ceil( students.length / studentsPerPage ) + 1;
+// defines page title so we can change for search results
+let title = document.getElementById('page-title');
 
+// Define how many page numbers are needed based on # of list items in .student-list
 let pagesDiv;
 let currentPageNumber = 1;
 
+// initialize search results at 0, set up array
+let searchResultNumber = 0;
+let searchResultsArray = [];
+
 // Change students that are visible based on the page number
-function showPage(newPageNumber) {
+function showPage(relevantArray, newPageNumber) {
   // Hide all students currently on page
-  for(var i = 0; i < students.length; i++) {
-    students[i].classList.add("hidden");
+  for(var i = 0; i < relevantArray.length; i++) {
+    relevantArray[i].classList.add("hidden");
   }
+
+  // clear any search result title
+  if (relevantArray === students) {
+    title.innerHTML = `Students`;
+  }
+
   // Capture the student indexes that should be shown on  page
   let newStartIndex = (newPageNumber * studentsPerPage - studentsPerPage);
   let newEndIndex = newPageNumber * studentsPerPage;
 
   // This fixes the issue of the last page breaking.
   // Is there a cleaner way to do this?
-  if (newEndIndex > students.length) {
-    newEndIndex = students.length;
+  if (newEndIndex > relevantArray.length) {
+    newEndIndex = relevantArray.length;
   }
   // Set relevant students to be visible
   for(var i = newStartIndex; i < newEndIndex; i++) {
-    students[i].classList.remove("hidden");
+    relevantArray[i].classList.remove("hidden");
   }
 };
 
-function appendPageLinks(currentPageNumber){
+function appendPageLinks(relevantArray, currentPageNumber){
   // Remove the old page link section from the site
   pagesDiv = document.getElementsByClassName('pagination')[0];
   pagesDiv.innerHTML = "";
+
+  // sets pages variable based on array length
+  let pages =  Math.ceil( relevantArray.length / studentsPerPage ) + 1;
 
   // Create page link html
   let pagesHTML = `<ul> `;
@@ -43,24 +57,111 @@ function appendPageLinks(currentPageNumber){
   for(var i = 1; i < pages; i++) {
     // Add link to the ul for each page
     if (i === currentPageNumber) {
-      pagesHTML += `<li>
-        <a href="#" class="active" onclick="appendPageLinks(${i})";>${i}</a>
-        </li>`;
+      // Changes array input for students or search results so pagination
+      // links to the correct array
+      // (Is there a cleaner way to do this?)
+      if (relevantArray === students) {
+        pagesHTML += `<li>
+          <a href="#" class="active" onclick="appendPageLinks(students,${i})";>${i}</a>
+          </li>`;
+      } else {
+        pagesHTML += `<li>
+          <a href="#" class="active" onclick="appendPageLinks(searchResultsArray,${i})";>${i}</a>
+          </li>`;
+      }
     } else {
-      pagesHTML += `<li>
-        <a href="#" onclick="appendPageLinks(${i})">${i}</a>
-        </li>`;
+      if (relevantArray === students) {
+        pagesHTML += `<li>
+          <a href="#" onclick="appendPageLinks(students,${i})">${i}</a>
+          </li>`;
+      } else {
+        pagesHTML += `<li>
+          <a href="#" onclick="appendPageLinks(searchResultsArray,${i})">${i}</a>
+          </li>`;
+      }
     }
     };
   pagesHTML += '</ul>'
 
-  showPage(currentPageNumber);
+  showPage(relevantArray,currentPageNumber);
 
   // Displays created HTML on page
   pagesDiv.innerHTML = pagesHTML;
 
 };
 
+function createSearchBox() {
+  let searchDiv = document.getElementsByClassName('student-search')[0];
+  //when it leaves focus clear search box?
+  // "x" to clear
+  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
+};
+
+function searchButtonPress() {
+  // Stores search input and clears box
+  let searchInput = document.getElementById("search-input").value;
+  document.getElementById("search-input").value = "";
+
+  // compare it to the strings
+  // if it's empty, just show the normal page
+  if (searchInput != '') {
+    for(var i = 0; i < students.length; i++) {
+      students[i].classList.add("hidden");
+    }
+    pagesDiv.innerHTML = "";
+  } else {
+    console.log("hey");
+    showPage(currentPageNumber);
+    pagesDiv.innerHTML = pagesHTML;
+  }
+
+  // translate filter to lowercase for comparison
+  let filter = searchInput.toLowerCase();
+  // set up "no results" scenario
+  let ul = document.getElementsByClassName('student-list')[0];
+  let noResults = `<p>No results</p>`;
+  // resets number of results to 0
+  searchResultsArray = [];
+  searchResultNumber = 0;
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < students.length; i++) {
+     result = students[i].getElementsByTagName("h3")[0];
+     if (result.innerHTML.toLowerCase().indexOf(filter) > -1) {
+         students[i].classList.remove("hidden");
+         searchResultsArray.push(students[i]);
+         searchResultNumber += 1;
+     } else {
+         students[i].classList.add("hidden");
+     };
+  };
+
+  // If there's too many students to show on one page (>10),
+  // paginate search results
+  if (searchResultNumber > studentsPerPage) {
+    appendPageLinks(searchResultsArray, 1);
+  }
+
+  // if there's no results
+  if (searchResultNumber === 0) {
+    pagesDiv.innerHTML = noResults;
+  };
+
+  // sets page title to indicate # of search results
+  if (searchResultNumber === 1) {
+    title.innerHTML = `Students - ${searchResultNumber} search result for "${filter}" <a href="#" class="clear-results" onclick="appendPageLinks(students,1)";>clear</a>`;
+  } else {
+    title.innerHTML = `Students - ${searchResultNumber} search results for "${filter}" <a href="#" class="clear-results" onclick="appendPageLinks(students,1)";>clear</a>`;
+  }
+};
+
+// Initializes page on page 1.
+appendPageLinks(students, 1);
+createSearchBox();
+
+/// ADD ARROWS?
+
+//old search layout
 
 // function searchList(searchText) {
 //     // Obtain the value of the search input
@@ -80,68 +181,3 @@ function appendPageLinks(currentPageNumber){
 //
 // //on typing in search box, call search
 // //on leaving focus. x to clear.
-
-function createSearchBox() {
-  let searchDiv = document.getElementsByClassName('student-search')[0];
-  //when it leaves focus clear search box?
-  // "x" to clear
-  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
-};
-
-function searchButtonPress() {
-  // take the search input
-  // compare it to the strings
-  // if it's empty
-
-  let searchInput = document.getElementById("search-input").value;
-  // console.log(searchInput);
-
-  if (searchInput != '') {
-    for(var i = 0; i < students.length; i++) {
-      students[i].classList.add("hidden");
-    }
-    pagesDiv.innerHTML = "";
-  } else {
-    console.log("hey");
-    showPage(currentPageNumber);
-    pagesDiv.innerHTML = pagesHTML;
-  }
-
-  // Declare variables
-  let filter = searchInput.toLowerCase();
-  let ul = document.getElementsByClassName('student-list')[0];
-  let noResults = `<p>noresults</p>`;
-  var searchResultNumber = 0;
-
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < students.length; i++) {
-     result = students[i].getElementsByTagName("h3")[0];
-     if (result.innerHTML.toLowerCase().indexOf(filter) > -1) {
-         students[i].classList.remove("hidden");
-         searchResultNumber += 1;
-     } else {
-         students[i].classList.add("hidden");
-     };
-  };
-
-  if (searchResultNumber > studentsPerPage) {
-    var searchResultPages = Math.ceil( searchResultNumber / studentsPerPage );
-    appendSearchLinks(searchResultPages);
-  }
-
-  if (searchResultNumber > 0) {
-    // change title of page to students - search results
-  };
-
-  // if there's no results
-  if (searchResultNumber === 0) {
-    pagesDiv.innerHTML = noResults;
-  };
-
-};
-
-// Initializes page on page 1.
-appendPageLinks(1);
-createSearchBox();
-
-/// ADD ARROWS?
