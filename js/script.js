@@ -94,7 +94,14 @@ function createSearchBox() {
   let searchDiv = document.getElementsByClassName('student-search')[0];
   //when it leaves focus clear search box?
   // "x" to clear
-  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
+  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" onkeypress="detectIfEnter(event)" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
+};
+
+function detectIfEnter(e) {
+  if(e.keyCode === 13){
+      e.preventDefault(); // Ensure it is only this code that rusn
+      searchButtonPress();
+  };
 };
 
 function searchButtonPress() {
@@ -110,9 +117,8 @@ function searchButtonPress() {
     }
     pagesDiv.innerHTML = "";
   } else {
-    console.log("hey");
-    showPage(currentPageNumber);
-    pagesDiv.innerHTML = pagesHTML;
+    appendPageLinks(students,currentPageNumber);
+    return;
   }
 
   // translate filter to lowercase for comparison
@@ -158,26 +164,3 @@ function searchButtonPress() {
 // Initializes page on page 1.
 appendPageLinks(students, 1);
 createSearchBox();
-
-/// ADD ARROWS?
-
-//old search layout
-
-// function searchList(searchText) {
-//     // Obtain the value of the search input
-//     let searchText =
-//     // remove the previous page link section
-//     // Loop over the student list, and for each student…
-// // ...obtain the student’s name…
-// // ...and the student’s email…
-// // ...if the search value is found inside either email or name…
-//     		// ...add this student to list of “matched” student
-//     // If there’s no “matched” students…
-//            // ...display a “no student’s found” message
-//     // If over ten students were found…
-//            // ...call appendPageLinks with the matched students
-//    // Call showPage to show first ten students of matched list
-// }
-//
-// //on typing in search box, call search
-// //on leaving focus. x to clear.
