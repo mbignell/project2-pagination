@@ -91,10 +91,14 @@ function appendPageLinks(relevantArray, currentPageNumber){
 };
 
 function createSearchBox() {
-  let searchDiv = document.getElementsByClassName('student-search')[0];
-  //when it leaves focus clear search box?
-  // "x" to clear
-  searchDiv.innerHTML =  `<div id="student-search"><input id="search-input" onkeypress="detectIfEnter(event)" placeholder="Search for students..."> <button onClick="searchButtonPress()">Search</button></div>`;
+  var header = document.getElementsByClassName('page-header')[0];
+  header.innerHTML =  `<h2 id="page-title">Students</h2>` +
+  `<div id="student-search" class="student-search">` +
+  `<input id="search-input" onkeypress="detectIfEnter(event)" placeholder="Search for students...">` +
+  `<button onClick="searchButtonPress()">Search</button>` +
+  `</div>`;
+  // resets title since we just replaced it
+  title = document.getElementById('page-title');
 };
 
 function detectIfEnter(e) {
